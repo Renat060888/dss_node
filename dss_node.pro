@@ -15,6 +15,11 @@ DEFINES += \
     SWITCH_LOGGER_SIMPLE \
 
 LIBS += \
+    -lrti1516e \ # TODO: wtf?
+    -lfedtime1516e \ # TODO: wtf?
+    -lFedTime \     # OpenRTI # TODO: wtf?
+    -lOpenRTI \     # OpenRTI # TODO: wtf?
+    -lRTI-NG \      # OpenRTI # TODO: wtf?
     -lmicroservice_common \
     -ldss_common
 
