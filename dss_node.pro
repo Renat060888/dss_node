@@ -20,6 +20,7 @@ LIBS += \
     -lFedTime \     # OpenRTI # TODO: wtf?
     -lOpenRTI \     # OpenRTI # TODO: wtf?
     -lRTI-NG \      # OpenRTI # TODO: wtf?
+    -lboost_program_options \ # TODO: wtf?
     -lmicroservice_common \
     -ldss_common
 
