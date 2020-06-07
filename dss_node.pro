@@ -1,7 +1,7 @@
 ROOT_DIR=../
 
 TEMPLATE = app
-TARGET = node
+TARGET = dss_node
 
 include($${ROOT_DIR}pri/common.pri)
 
@@ -11,8 +11,9 @@ CONFIG -= qt
 QMAKE_CXXFLAGS += -Wno-unused-parameter
 QMAKE_CXXFLAGS += -Wno-unused-variable
 
+# TODO: add defines to logger, system monitor, restbed webserver, database, etc...
 DEFINES += \
-    SWITCH_LOGGER_SIMPLE \
+    SWITCH_LOGGER_ASTRA \
 
 LIBS += \
     -lrti1516e \ # TODO: wtf?
@@ -21,6 +22,8 @@ LIBS += \
     -lOpenRTI \     # OpenRTI # TODO: wtf?
     -lRTI-NG \      # OpenRTI # TODO: wtf?
     -lboost_program_options \ # TODO: wtf?
+    -lunilog \  # TODO: wtf?
+    -lobjrepr \  # TODO: wtf?
     -lmicroservice_common \
     -ldss_common
 
@@ -41,7 +44,6 @@ SOURCES += \
         storage/storage_engine.cpp
 
 HEADERS += \
-    datasource/source_manager.h \
     node_agent.h \
     datasource/node_controller_dump.h \
     datasource/node_controller_real.h \
@@ -49,4 +51,5 @@ HEADERS += \
     datasource/node_worker_dump.h \
     datasource/node_worker_real.h \
     datasource/node_worker_simulation.h \
-    storage/storage_engine.h
+    storage/storage_engine.h \
+    datasource/source_manager_facade.h

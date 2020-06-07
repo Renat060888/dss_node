@@ -15,7 +15,7 @@ static bool initSingletons( int _argc, char ** _argv, char ** _env ){
     ArgsParser::SInitSettings settings;
     settings.argc = _argc;
     settings.argv = _argv;
-    settings.printConfigExample = std::bind( & AConfigReader::printToStdoutConfigExample, & CONFIG_READER );
+    settings.printConfigExample = std::bind( & AConfigReader::getConfigExample, & CONFIG_READER );
     settings.commandConvertor = nullptr; // & UNIFIED_COMMAND_CONVERTOR;
     if( ! ARGS_PARSER.init(settings) ){
         return false;
