@@ -53,10 +53,7 @@ static bool initSingletons( int _argc, char ** _argv, char ** _env ){
 
 static bool executeShellCommand(){
 
-
-
-
-
+    // TODO: do
 
     return true;
 }

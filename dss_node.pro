@@ -13,7 +13,10 @@ QMAKE_CXXFLAGS += -Wno-unused-variable
 
 # TODO: add defines to logger, system monitor, restbed webserver, database, etc...
 DEFINES += \
-    SWITCH_LOGGER_ASTRA \
+    SWITCH_LOGGER_SIMPLE \
+#    SWITCH_LOGGER_ASTRA \
+#    OBJREPR_LIBRARY_EXIST \
+#    UNIT_TESTS_GOOGLE \
 
 LIBS += \
     -lrti1516e \ # TODO: wtf?
@@ -21,11 +24,23 @@ LIBS += \
     -lFedTime \     # OpenRTI # TODO: wtf?
     -lOpenRTI \     # OpenRTI # TODO: wtf?
     -lRTI-NG \      # OpenRTI # TODO: wtf?
+    -lboost_system \ # TODO: wtf?
     -lboost_program_options \ # TODO: wtf?
-    -lunilog \  # TODO: wtf?
-    -lobjrepr \  # TODO: wtf?
     -lmicroservice_common \
     -ldss_common
+
+contains( DEFINES, OBJREPR_LIBRARY_EXIST ){
+    message("connect 'unilog' and 'objrepr' libraries")
+LIBS += \
+    -lunilog \
+    -lobjrepr
+}
+
+contains( DEFINES, UNIT_TESTS_GOOGLE ){
+    message("connect 'gtests' library")
+LIBS += \
+    -lgtest
+}
 
 # NOTE: paths for dev environment ( all projects sources in one dir )
 INCLUDEPATH +=  \
