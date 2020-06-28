@@ -47,7 +47,9 @@ INCLUDEPATH +=  \
     $${ROOT_DIR}/microservice_common/ \
 
 SOURCES += \
-        datasource/source_manager.cpp \
+        datasource/dispatcher_node_simulation.cpp \
+        datasource/node_worker_proxy_simulation.cpp \
+        datasource/source_manager_facade.cpp \
         main.cpp \
         node_agent.cpp \
         datasource/node_controller_dump.cpp \
@@ -59,6 +61,9 @@ SOURCES += \
         storage/storage_engine.cpp
 
 HEADERS += \
+    datasource/dispatcher_node_simulation.h \
+    datasource/node_worker_proxy_simulation.h \
+    datasource/source_manager_facade.h \
     node_agent.h \
     datasource/node_controller_dump.h \
     datasource/node_controller_real.h \
@@ -66,5 +71,4 @@ HEADERS += \
     datasource/node_worker_dump.h \
     datasource/node_worker_real.h \
     datasource/node_worker_simulation.h \
-    storage/storage_engine.h \
-    datasource/source_manager_facade.h
+    storage/storage_engine.h
