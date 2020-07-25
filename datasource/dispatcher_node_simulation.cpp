@@ -3,7 +3,16 @@
 
 using namespace std;
 
+static constexpr const char * PRINT_HEADER = "DispatcherNodeSimula:";
+
 DispatcherNodeSimulation::DispatcherNodeSimulation()
 {
+
+}
+
+void DispatcherNodeSimulation::runSystemClock(){
+
+
+
 
 }

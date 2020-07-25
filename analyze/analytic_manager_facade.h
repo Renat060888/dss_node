@@ -1,8 +1,8 @@
-#ifndef STORAGE_ENGINE_H
-#define STORAGE_ENGINE_H
+#ifndef ANALYTIC_MANAGER_FACADE_H
+#define ANALYTIC_MANAGER_FACADE_H
 
 
-class StorageEngineFacade
+class AnalyticManagerFacade
 {
 public:
     struct SServiceLocator {
@@ -13,13 +13,17 @@ public:
         SServiceLocator services;
     };
 
-    StorageEngineFacade();
-    ~StorageEngineFacade();
+    AnalyticManagerFacade();
 
     bool init( const SInitSettings & _settings );
-
     void shutdown();
+
+
+private:
+
+
+
 
 };
 
-#endif // STORAGE_ENGINE_H
+#endif // ANALYTIC_MANAGER_FACADE_H

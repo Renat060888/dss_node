@@ -7,3 +7,11 @@ NodeControllerSimulation::NodeControllerSimulation()
 {
 
 }
+
+bool NodeControllerSimulation::init( const SInitSettings & _settings ){
+
+}
+
+void NodeControllerSimulation::launch(){
+
+}

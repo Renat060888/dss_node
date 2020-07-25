@@ -19,6 +19,7 @@ DEFINES += \
 #    UNIT_TESTS_GOOGLE \
 
 LIBS += \
+    -lpthread \
     -lrti1516e \ # TODO: wtf?
     -lfedtime1516e \ # TODO: wtf?
     -lFedTime \     # OpenRTI # TODO: wtf?
@@ -26,6 +27,9 @@ LIBS += \
     -lRTI-NG \      # OpenRTI # TODO: wtf?
     -lboost_system \ # TODO: wtf?
     -lboost_program_options \ # TODO: wtf?
+    -lboost_filesystem \
+    -lboost_regex \
+    -ljsoncpp \
     -lmicroservice_common \
     -ldss_common
 
@@ -44,7 +48,10 @@ LIBS += \
 
 # NOTE: paths for dev environment ( all projects sources in one dir )
 INCLUDEPATH +=  \
-    $${ROOT_DIR}/microservice_common/ \
+    /usr/include/libmongoc-1.0 \
+    /usr/include/libbson-1.0 \
+    $${ROOT_DIR}/microservice_common/ \ # TODO: avoidance of ugly traverse "../" for this lib's headers
+    $${ROOT_DIR}/dss_common/ \ # TODO: avoidance of ugly traverse "../" for this lib's headers
 
 SOURCES += \
         datasource/dispatcher_node_simulation.cpp \
@@ -58,7 +65,21 @@ SOURCES += \
         datasource/node_worker_dump.cpp \
         datasource/node_worker_real.cpp \
         datasource/node_worker_simulation.cpp \
-        storage/storage_engine.cpp
+        storage/storage_engine.cpp \
+    system/args_parser.cpp \
+    system/config_reader.cpp \
+    system/path_locator.cpp \
+    communication/commands/cmd_context_close.cpp \
+    communication/commands/cmd_context_open.cpp \
+    communication/commands/cmd_node_agent_ping.cpp \
+    communication/commands/cmd_user_ping.cpp \
+    communication/commands/cmd_user_register.cpp \
+    communication/command_factory.cpp \
+    communication/communication_gateway_facade_node.cpp \
+    communication/unified_command_convertor_node.cpp \
+    datasource/dispatcher_node_real.cpp \
+    analyze/analytic_manager_facade.cpp \
+    datasource/node_worker_proxy_real.cpp
 
 HEADERS += \
     datasource/dispatcher_node_simulation.h \
@@ -71,4 +92,18 @@ HEADERS += \
     datasource/node_worker_dump.h \
     datasource/node_worker_real.h \
     datasource/node_worker_simulation.h \
-    storage/storage_engine.h
+    storage/storage_engine.h \
+    system/args_parser.h \
+    system/config_reader.h \
+    system/path_locator.h \
+    communication/commands/cmd_context_close.h \
+    communication/commands/cmd_context_open.h \
+    communication/commands/cmd_node_agent_ping.h \
+    communication/commands/cmd_user_ping.h \
+    communication/commands/cmd_user_register.h \
+    communication/command_factory.h \
+    communication/communication_gateway_facade_node.h \
+    communication/unified_command_convertor_node.h \
+    datasource/dispatcher_node_real.h \
+    analyze/analytic_manager_facade.h \
+    datasource/node_worker_proxy_real.h
