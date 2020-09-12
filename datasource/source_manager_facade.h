@@ -13,6 +13,7 @@ class SourceManagerFacade
 {
 public:
     struct SInitSettings {
+        common_types::TNodeId agentId;
         common_types::IServiceInternalCommunication * serviceInternalCommunication;
     };
 
@@ -27,7 +28,9 @@ public:
     bool init( const SInitSettings & _settings );
     void shutdown();
 
-
+    // REQUEST FROM CORE
+    DispatcherNodeSimulation * getSimulaDispatcher();
+    DispatcherNodeReal * getRealDispatcher();
 
 
 private:
@@ -37,15 +40,18 @@ private:
     bool initRealMode( const SInitSettings & _settings );
     bool initDumpMode( const SInitSettings & _settings );
 
-    void pingCore();
-    void refreshPluginLibs();
+    // RESPONSE TO CORE
+    inline void pingCore();
+    std::string serializeSimulationMode();
+    std::string serializeRealMode();
+    std::string serializeDumpMode();
 
+    void refreshPluginLibs();
 
 
     // data
     SState m_state;
-    bool m_shutdownCalled;
-    int64_t m_lastPluginsRefreshSec;
+    bool m_shutdownCalled;    
 
     // service
     PNetworkClient m_networkWithCore;
@@ -55,7 +61,6 @@ private:
     common_types::INodeDispatcher * m_dispatcher;
     DispatcherNodeSimulation * m_dispatcherNodeSimulation;
     DispatcherNodeReal * m_dispatcherNodeReal;
-
 };
 
 #endif // SOURCE_MANAGER_H

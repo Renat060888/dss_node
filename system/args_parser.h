@@ -15,8 +15,10 @@ enum class ENodeArguments {
     NODE_WORKER_SIMULATION          = 1 << 8,
     NODE_WORKER_REAL                = 1 << 9,
     NODE_WORKER_DUMP                = 1 << 10,
-    CONTEXT_ID                      = 1 << 11,
-    MISSION_ID                      = 1 << 12,
+    NODE_WORKER_ID                  = 1 << 11,
+    NODE_AGENT_ID                   = 1 << 12,
+    CONTEXT_ID                      = 1 << 13,
+    MISSION_ID                      = 1 << 14,
     UNDEFINED                       = 1 << 31
 };
 

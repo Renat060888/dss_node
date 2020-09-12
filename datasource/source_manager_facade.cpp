@@ -1,6 +1,8 @@
 
+#include <boost/property_tree/json_parser.hpp>
 #include <microservice_common/system/system_monitor.h>
 #include <microservice_common/system/logger.h>
+#include <dss_common/common/common_utils.h>
 
 #include "system/args_parser.h"
 #include "system/config_reader.h"
@@ -9,13 +11,11 @@
 using namespace std;
 
 static constexpr const char * PRINT_HEADER = "SrcManager:";
-
 static constexpr const char * PLUGIN_SYMBOL_CONSTRUCT = "construct";
-static constexpr const char * PLUGIN_SYMBOL_GET_NAME = "getName";
+static constexpr const char * PLUGIN_SYMBOL_GET_NAME = "get_name";
 
 SourceManagerFacade::SourceManagerFacade()
     : m_shutdownCalled(false)
-    , m_lastPluginsRefreshSec(0)
     , m_threadMaintenance(nullptr)
     , m_dispatcher(nullptr)
     , m_dispatcherNodeSimulation(nullptr)
@@ -33,7 +33,7 @@ bool SourceManagerFacade::init( const SInitSettings & _settings ){
 
     m_state.settings = _settings;
 
-    // choose agent type
+    // agent type
     if( ARGS_PARSER.isKeyExist(ENodeArguments::NODE_AGENT_SIMULATION) ){
         if( ! initSimulationMode(_settings) ){
             return false;
@@ -54,6 +54,7 @@ bool SourceManagerFacade::init( const SInitSettings & _settings ){
         return false;
     }
 
+    // network
     m_networkWithCore = _settings.serviceInternalCommunication->getCoreCommunicator();
 
     // maintenance thread
@@ -74,9 +75,18 @@ bool SourceManagerFacade::initSimulationMode( const SInitSettings & _settings ){
         return false;
     }
 
+    // dispatcher
+    DispatcherNodeSimulation::SInitSettings settingsDisp;
+    settingsDisp.internalCommunication = _settings.serviceInternalCommunication;
+    settingsDisp.nodeAgentId = _settings.agentId;
     m_dispatcherNodeSimulation = new DispatcherNodeSimulation();
+    if( m_dispatcherNodeSimulation->init(settingsDisp) ){
+        return false;
+    }
+
     m_dispatcher = m_dispatcherNodeSimulation;
 
+    // ...
 
 
 
@@ -95,9 +105,19 @@ bool SourceManagerFacade::initRealMode( const SInitSettings & _settings ){
         return false;
     }
 
+    // dispatcher
+    DispatcherNodeReal::SInitSettings settingsDisp;
+    settingsDisp.internalCommunication = _settings.serviceInternalCommunication;
+    settingsDisp.nodeAgentId = _settings.agentId;
+    settingsDisp.pluginNames = m_libraryLoader.getLoadedLibrariesNames();
     m_dispatcherNodeReal = new DispatcherNodeReal();
+    if( m_dispatcherNodeReal->init(settingsDisp) ){
+        return false;
+    }
+
     m_dispatcher = m_dispatcherNodeReal;
 
+    // ...
 
 
 
@@ -139,40 +159,53 @@ void SourceManagerFacade::threadMaintenance(){
 
     while( ! m_shutdownCalled ){
 
-        m_dispatcher->runSystemClock();
         pingCore();
         refreshPluginLibs();
+        m_dispatcher->runSystemClock();
     }
 
     VS_LOG_INFO << PRINT_HEADER << " maintenance THREAD stopped" << endl;
 }
 
-void SourceManagerFacade::pingCore(){
+inline void SourceManagerFacade::pingCore(){
 
-    // ping core ( workers, available physic models, system info, etc... )
+    static constexpr int64_t PING_INTERVAL_MILLISEC = 1000;
+    static int64_t lastPingAtMillisec = 0;
 
-    const string serializedMsg = "";
+    if( (common_utils::getCurrentTimeMillisec() - lastPingAtMillisec) > PING_INTERVAL_MILLISEC ){
+        lastPingAtMillisec = common_utils::getCurrentTimeMillisec();
 
+        string serializedMsg;
 
+        // TODO: may be smelly approach
+        if( m_dispatcherNodeSimulation ){
+            serializedMsg = serializeSimulationMode();
+        }
+        else if( m_dispatcherNodeReal ){
+            serializedMsg = serializeRealMode();
+        }
 
-
-    PEnvironmentRequest netRequest = m_networkWithCore->getRequestInstance();
-    netRequest->setOutcomingMessage( serializedMsg );
+        PEnvironmentRequest netRequest = m_networkWithCore->getRequestInstance();
+        netRequest->setOutcomingMessage( serializedMsg );
+    }
 }
 
 void SourceManagerFacade::refreshPluginLibs(){
 
+    // TODO: really need ?
+    return;
+
     // every N minutes
     static constexpr int64_t REFRESH_INTERVAL_SEC = 60;    
+    int64_t lastPluginsRefreshSec = 0;
 
-    if( (common_utils::getCurrentTimeSec() - m_lastPluginsRefreshSec) < REFRESH_INTERVAL_SEC ){
+    if( (common_utils::getCurrentTimeSec() - lastPluginsRefreshSec) < REFRESH_INTERVAL_SEC ){
         return;
     }
-    m_lastPluginsRefreshSec = common_utils::getCurrentTimeSec();
+    lastPluginsRefreshSec = common_utils::getCurrentTimeSec();
 
     // get files list
     vector<pair<string, int64_t>> pluginFileNameTimes;
-
 
 
 
@@ -182,7 +215,8 @@ void SourceManagerFacade::refreshPluginLibs(){
 
         // reload
         if( fileNameTime.second != loadTimeMillisec ){
-            m_libraryLoader.load( fileNameTime.first, true );
+            const bool reloadIfExist = true;
+            m_libraryLoader.load( fileNameTime.first, reloadIfExist );
         }
         // new one
         else if( 0 == loadTimeMillisec ){
@@ -192,15 +226,105 @@ void SourceManagerFacade::refreshPluginLibs(){
                 m_dispatcherNodeReal->addPluginName( fileNameTime.first );
             }
         }
+        // plugin removed from dir
+        // TODO:
     }
 
 
 
 }
 
+std::string SourceManagerFacade::serializeSimulationMode(){
+
+    // node state
+    boost::property_tree::ptree serializedNodeStatesArray;
+    const vector<PNodeProxyWorkerSimulation> & simulaNodes = m_dispatcherNodeSimulation->getNodes();
+    for( const PNodeProxyWorkerSimulation & simulaNode : simulaNodes ){
+        const common_types::SNodeWorkerSimulationState & nodeState = simulaNode->getState();
+
+        boost::property_tree::ptree nodeStateElem;
+
+        nodeStateElem.put( "id", nodeState.id );
+        nodeStateElem.put( "ctx_id", nodeState.ctxId );
+        nodeStateElem.put( "status", common_utils::convertNodeStatusToStr(nodeState.status) );
+
+        serializedNodeStatesArray.push_back( boost::property_tree::ptree::value_type("", nodeStateElem) );
+    }
+
+    // physic models
+    boost::property_tree::ptree serializedLibNamesArray;
+    const std::vector<std::string> libNames = m_libraryLoader.getLoadedLibrariesNames();
+    for( const string & libName : libNames ){
+        boost::property_tree::ptree libNameElem;
+
+        libNameElem.put( "lib_name", libName );
+
+        serializedLibNamesArray.push_back( boost::property_tree::ptree::value_type("", libNameElem) );
+    }
+
+    // system
+    boost::property_tree::ptree serializedSystemState;
+    const SystemMonitor::STotalInfo systemSnapshot = SYSTEM_MONITOR.getTotalSnapshot();
+
+    serializedSystemState.add( "cpu_avg_load_percent", systemSnapshot.cpu.totalLoadByAvgFromCoresPercent );
+    serializedSystemState.add( "ram_total_mb", systemSnapshot.memory.ramTotalMb );
+    serializedSystemState.add( "ram_free_mb", systemSnapshot.memory.ramFreeMb );
 
 
 
+
+    // result
+    boost::property_tree::ptree serializedState;
+    serializedState.add_child( "node_states", serializedNodeStatesArray );
+    serializedState.add_child( "lib_names", serializedLibNamesArray );
+    serializedState.add_child( "system_state", serializedSystemState );
+
+    stringstream ss;
+    boost::property_tree::json_parser::write_json( ss, serializedState );
+    return ss.str();
+}
+
+std::string SourceManagerFacade::serializeRealMode(){
+
+    const vector<PNodeWorkerReal> & realNodes = m_dispatcherNodeReal->getNodes();
+    const SystemMonitor::STotalInfo systemSnapshot = SYSTEM_MONITOR.getTotalSnapshot();
+    const std::vector<std::string> pluginsLibs = m_libraryLoader.getLoadedLibrariesNames();
+
+    // create real node agent protobuf
+
+
+
+
+
+
+    boost::property_tree::ptree serializedState;
+
+    stringstream ss;
+    boost::property_tree::json_parser::write_json( ss, serializedState );
+    return ss.str();
+}
+
+std::string SourceManagerFacade::serializeDumpMode(){
+
+
+
+
+
+
+    boost::property_tree::ptree serializedState;
+
+    stringstream ss;
+    boost::property_tree::json_parser::write_json( ss, serializedState );
+    return ss.str();
+}
+
+DispatcherNodeSimulation * SourceManagerFacade::getSimulaDispatcher(){
+    return m_dispatcherNodeSimulation;
+}
+
+DispatcherNodeReal * SourceManagerFacade::getRealDispatcher(){
+    return m_dispatcherNodeReal;
+}
 
 
 

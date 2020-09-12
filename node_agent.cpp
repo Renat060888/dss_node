@@ -58,6 +58,8 @@ bool NodeAgent::init( const SInitSettings & _settings ){
     const SystemMonitor::STotalInfo info = SYSTEM_MONITOR.getTotalSnapshot();
     SYSTEM_MONITOR.printOnScreen( info );
 
+    const string agentId = common_utils::generateUniqueId();
+
     SystemEnvironmentFacade::SInitSettings settings0;
     settings0.services;
     settings0.databaseHost = CONFIG_PARAMS.baseParams.MONGO_DB_ADDRESS;
@@ -79,6 +81,7 @@ bool NodeAgent::init( const SInitSettings & _settings ){
 
     SourceManagerFacade::SInitSettings settings2;
     settings2.serviceInternalCommunication = m_communicateGateway->serviceForInternalCommunication();
+    settings2.agentId = agentId;
     if( ! m_sourceManager->init(settings2) ){
         return false;
     }

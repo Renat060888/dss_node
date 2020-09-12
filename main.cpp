@@ -8,8 +8,9 @@
 #include "system/config_reader.h"
 #include "system/path_locator.h"
 #include "communication/unified_command_convertor_node.h"
-#include "datasource/node_controller_simulation.h"
-#include "datasource/node_controller_real.h"
+#include "node_controller_simulation.h"
+#include "node_controller_real.h"
+#include "node_controller_dump.h"
 #include "node_agent.h"
 
 using namespace std;
@@ -112,7 +113,7 @@ static void parseResponse( const std::string & _msg ){
         return;
     }
 
-    VS_LOG_INFO << "response from unix-socket-dss [" <<  _msg << "]" << endl;
+    VS_LOG_INFO << "response from unix-socket-node [" <<  _msg << "]" << endl;
 
     // TODO: print values from parsedRepsonseJson ?
 }
@@ -180,6 +181,8 @@ static bool executeShellCommand(){
 
         if( ARGS_PARSER.isKeyExist(ENodeArguments::NODE_WORKER_SIMULATION) ){
             NodeControllerSimulation::SInitSettings settings;
+            settings.agentId = ARGS_PARSER.getVal(ENodeArguments::NODE_AGENT_ID);
+            settings.workerId = ARGS_PARSER.getVal(ENodeArguments::NODE_WORKER_ID);
             settings.ctxId = std::stoi( ARGS_PARSER.getVal(ENodeArguments::CONTEXT_ID) );
             settings.missionId = std::stoi( ARGS_PARSER.getVal(ENodeArguments::MISSION_ID) );
             NodeControllerSimulation controller;
@@ -192,6 +195,8 @@ static bool executeShellCommand(){
         }
         else if( ARGS_PARSER.isKeyExist(ENodeArguments::NODE_WORKER_REAL) ){
             NodeControllerReal::SInitSettings settings;
+            settings.agentId = ARGS_PARSER.getVal(ENodeArguments::NODE_AGENT_ID);
+            settings.workerId = ARGS_PARSER.getVal(ENodeArguments::NODE_WORKER_ID);
             settings.ctxId = std::stoi( ARGS_PARSER.getVal(ENodeArguments::CONTEXT_ID) );
             settings.missionId = std::stoi( ARGS_PARSER.getVal(ENodeArguments::MISSION_ID) );
             NodeControllerReal controller;

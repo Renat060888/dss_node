@@ -4,11 +4,11 @@
 #include <microservice_common/communication/i_command_external.h>
 #include <dss_common/common/common_types.h>
 
-class CommandUserRegister : public ICommandExternal
+class CommandWorkerStart : public ICommandExternal
 {
     friend class CommandFactory;
 public:
-    CommandUserRegister( common_types::SIncomingCommandServices * _services );
+    CommandWorkerStart( common_types::SIncomingCommandServices * _services );
 
     virtual bool exec() override;
 
@@ -20,6 +20,8 @@ private:
 
 
 };
-using PCommandUserRegister = std::shared_ptr<CommandUserRegister>;
+using PCommandWorkerStart = std::shared_ptr<CommandWorkerStart>;
 
 #endif // CMD_USER_REGISTER_H
+
+

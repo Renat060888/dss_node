@@ -13,8 +13,11 @@ public:
         std::string SYSTEM_UNILOG_CONFIG_PATH_FOR_WORKER_SIMULA;
         std::string SYSTEM_UNILOG_CONFIG_PATH_FOR_WORKER_REAL;
 
+        std::string STORAGE_DATABASE_HOST;
+        std::string STORAGE_DATABASE_NAME;
+
         std::string PLUGINS_SIMULATION_DIR_FULL_PATH;
-        std::string PLUGINS_REAL_DIR_FULL_PATH;        
+        std::string PLUGINS_REAL_DIR_FULL_PATH;
     };
 
     static ConfigReader & singleton(){

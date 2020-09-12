@@ -7,6 +7,8 @@ class NodeControllerReal
 {
 public:
     struct SInitSettings {
+        common_types::TNodeId agentId;
+        common_types::TNodeId workerId;
         common_types::TContextId ctxId;
         common_types::TMissionId missionId;
     };
@@ -23,6 +25,11 @@ public:
 
 
 private:
+    void processMessageConfigure();
+    void processMessageStart();
+    void processMessagePause();
+    void processMessageStop();
+    void processMessageSwitchLiveProcessing();
 
 
 

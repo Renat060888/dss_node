@@ -4,11 +4,11 @@
 #include <microservice_common/communication/i_command_external.h>
 #include <dss_common/common/common_types.h>
 
-class CommandContextOpen : public ICommandExternal
+class CommandWorkerConfigureReal : public ICommandExternal
 {
     friend class CommandFactory;
 public:
-    CommandContextOpen( common_types::SIncomingCommandServices * _services );
+    CommandWorkerConfigureReal( common_types::SIncomingCommandServices * _services );
 
     virtual bool exec() override;
 
@@ -20,6 +20,6 @@ private:
 
 
 };
-using PCommandContextOpen = std::shared_ptr<CommandContextOpen>;
+using PCommandWorkerConfigureReal = std::shared_ptr<CommandWorkerConfigureReal>;
 
 #endif // CMD_CONTEXT_OPEN_H
